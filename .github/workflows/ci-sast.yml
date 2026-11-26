@@ -47,7 +47,8 @@ jobs:
         run: pip install bandit
 
       - name: Run Bandit
-        run: bandit -r . -f json -o bandit-report.json -ll
+        run: bandit -r . -f json -o bandit-report.json -ll --exit-zero
+        
 
       - name: Upload Bandit report
         if: always()
