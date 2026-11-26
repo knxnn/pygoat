@@ -3,9 +3,9 @@ name: CI with SAST
 
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 permissions:
   contents: read
@@ -16,40 +16,57 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+
       - name: Django system check
         run: python manage.py check
 
   bandit-sast:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+
       - name: Install Bandit
         run: pip install bandit
+
       - name: Run Bandit
         run: bandit -r . -f json -o bandit-report.json -ll
+
       - name: Upload Bandit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: bandit-report
           path: bandit-report.json
+          if-no-files-found: ignore
 
   codeql-sast:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: github/codeql-action/init@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
         with:
           languages: python
-      - uses: github/codeql-action/analyze@v3
+
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@v3
